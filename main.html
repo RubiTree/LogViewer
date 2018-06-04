@@ -1,0 +1,76 @@
+
+<head>
+    <title>DispatchTask</title>
+    <meta name="author" content="Saltedfish Captain">
+</head>
+
+<body>
+<div id="body">
+    <div id="toolbar">
+        <button id="diff_btn" type="button" onclick="diff()">ANALYSIS</button>
+    </div>
+
+    <div id="input_textarea">
+        <textarea id="input_log_area"></textarea>
+        <textarea id="output_lifecycle_area"></textarea>
+        <textarea id="output_request_area"></textarea>
+    </div>
+</div>
+</body>
+
+
+<style type="text/css">
+    #body {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 1200px;
+    }
+
+    #toolbar {
+        left: 0;
+        right: 0;
+        height: 40px;
+        background-color: lightgrey;
+        padding: 10px;
+        text-align: center;
+        max-width: 1180px;
+    }
+
+    #diff_btn {
+       width: 40%;
+       height: 90%;
+    }
+
+    #input_textarea {
+        left: 0;
+        right: 0;
+        height: 400px;
+        background-color: lightgrey;
+        padding: 10px;
+        max-width: 1180px;
+        text-align: center;
+    }
+
+    #output_textarea {
+        left: 0;
+        right: 0;
+        height: 400px;
+        background-color: lightgrey;
+        padding: 10px;
+        max-width: 1180px;
+        text-align: center;
+    }
+
+    #input_textarea textarea {
+        width: 49%;
+        height: 100%;
+    }
+
+    #output_textarea textarea {
+        width: 32%;
+        height: 100%;
+    }
+</style>
+
+<script src="main.js">
+</script>
