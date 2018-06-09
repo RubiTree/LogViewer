@@ -52,7 +52,7 @@ function scrollArea(e) {
 }
 
 // ------
-get('https://'+getQueryVariable('redirectUrl'), function(result){
+get('https://aaaa'+getQueryVariable('redirectUrl'), function(result){
     console.log(result);
 });
 
