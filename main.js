@@ -45,23 +45,68 @@ function dropHandler(e) {
     reader.readAsText(file);
 }
 
-function scrollArea(e) {
+function scrollByPx(e) {
     var p = document.getElementById('input_log_area');
     var contentHeight = p.scrollHeight;
     p.scrollTop = (e.clientY / 900) * contentHeight - 400;
 }
 
+function scrollByIndex(e) {
+    var p = document.getElementById('input_log_area');
+    var index = Math.ceil((e.clientY / 900) * logLineSize);
+    var child = p.childNodes[index];
+    p.scrollTop = child.offsetTop - 800;
+}
+
 // ------
 get('https://'+getQueryVariable('redirectUrl'), function(result){
-    console.log(result);
+    renderContent(result);
 });
+
+// get('https://lc-tn27f1ke.cn-n1.lcfile.com/RTU8Rj5SDSJmF6z8Zrfli6X6ZV2WonJZ9fk41TtK.txt', function(result){
+//     renderContent(result);
+// });
+
+var logLineSize;
+
+function renderContent(logText){
+    var p = document.getElementById('input_log_area');
+
+    var logLines = logText.split('\n');
+    logLineSize = logLines.length;
+
+    var foundIndex = [];
+    var regex = /进入界面/;
+    for (var i = 0; i < logLines.length; i++) {
+        if (logLines[i].search(regex) > -1) {
+            foundIndex.push(i);
+        }
+    }
+
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+    for (var i = 0; i < foundIndex.length; i++) {
+        var positionY = (foundIndex[i] / logLineSize) * 900;
+        ctx.moveTo(0, positionY);
+        ctx.lineTo(200, positionY);
+    }
+    ctx.stroke();
+
+    for (var i = 0; i < logLines.length; i++) {
+        // logLines[i] = '<p>' + logLines[i].substr(1, 100) + '</p>';
+        logLines[i] = '<p class="log">' + logLines[i] + '</p>';
+    }
+    p.innerHTML = logLines.join('');
+}
+
+// ----
 
 var drag = document.getElementById('input_log_area');
 drag.addEventListener('drop', dropHandler, false);
 drag.addEventListener('dragover', dragOverHandler, false);
 
 var canvas = document.getElementById('canvas');
-canvas.addEventListener('click', scrollArea, false);
+canvas.addEventListener('click', scrollByIndex, false);
 
 
 // ----
