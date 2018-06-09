@@ -51,7 +51,7 @@ function scrollArea(e) {
     p.scrollTop = (e.clientY / 900) * contentHeight - 400;
 }
 
-// ---
+// ------
 get('https://'+getQueryVariable('redirectUrl'), function(result){
     console.log(result);
 });
