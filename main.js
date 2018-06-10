@@ -59,13 +59,13 @@ function scrollByIndex(e) {
 }
 
 // ------
-// get('https://'+getQueryVariable('redirectUrl'), function(result){
-//     renderContent(result);
-// });
-
-get('https://lc-tn27f1ke.cn-n1.lcfile.com/RTU8Rj5SDSJmF6z8Zrfli6X6ZV2WonJZ9fk41TtK.txt', function(result){
+get('https://'+getQueryVariable('redirectUrl'), function(result){
     renderContent(result);
 });
+
+// get('https://lc-tn27f1ke.cn-n1.lcfile.com/RTU8Rj5SDSJmF6z8Zrfli6X6ZV2WonJZ9fk41TtK.txt', function(result){
+//     renderContent(result);
+// });
 
 var logLineSize;
 var activityIndicator = new ActivityIndicator();
