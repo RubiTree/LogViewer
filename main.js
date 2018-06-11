@@ -197,7 +197,7 @@ function ActivityIndicator(){
             var newStack = new Array();
             newStack.push(indicator);
 
-            activityIndicatorStack.unshift(newStack);
+            this.activityIndicatorStack.unshift(newStack);
         } else {
             var currentStack = this.activityIndicatorStack[this.stackIndex];
             var index = currentStack.length - 1;
