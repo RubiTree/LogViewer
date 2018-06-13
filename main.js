@@ -8,7 +8,7 @@ function dropHandler(e) {
     e.stopPropagation();
     e.preventDefault();
 
-    var p = document.getElementById('input_log_area');
+    var p = document.getElementById('log_area');
     var files = e.dataTransfer.files;
     var file = files[0];
     var reader = new FileReader();
@@ -46,56 +46,115 @@ function dropHandler(e) {
 }
 
 function scrollByPx(e) {
-    var p = document.getElementById('input_log_area');
+    var p = document.getElementById('log_area');
     var contentHeight = p.scrollHeight;
-    p.scrollTop = (e.clientY / 900) * contentHeight - 400;
+    p.scrollTop = (e.clientY / ACTIVITY_AREA_HEIGHT) * contentHeight - 400;
 }
 
 function scrollByIndex(e) {
-    var p = document.getElementById('input_log_area');
-    var index = Math.ceil((e.clientY / 900) * logLineSize);
+    var p = document.getElementById('log_area');
+    var index = Math.ceil((e.clientY / ACTIVITY_AREA_HEIGHT) * logLineSize);
+
+    // 过滤最大值
+    if(index >= p.childNodes.length){
+        index = p.childNodes.length -1;
+    }
+
+    // 吸附最近关键点（目前只有activity)
+    index = getNearKeyIndex(index);
+
     var child = p.childNodes[index];
-    p.scrollTop = child.offsetTop - 800;
+    p.scrollTop = child.offsetTop - (ACTIVITY_AREA_HEIGHT/2);
+}
+
+var MAX_NEAR_DISTANCE;
+function getNearKeyIndex(index){
+    for (var i = 0; i < activityIndex.length; i++) {
+        if(activityIndex[i] > index){
+            if(i == 0){
+                if(activityIndex[i] - index <= MAX_NEAR_DISTANCE){
+                    return activityIndex[i];
+                }
+            }else{
+                var distanceBefore = index - activityIndex[i-1];
+                var distanceAfter = activityIndex[i] - index;
+
+                if(distanceBefore < distanceAfter){
+                    if(distanceBefore <= MAX_NEAR_DISTANCE){
+                        return activityIndex[i-1];
+                    }
+                }else{
+                    if(distanceAfter <= MAX_NEAR_DISTANCE){
+                        return activityIndex[i];
+                    }
+                }
+            }
+            return index;
+        }
+    }
+    return index;
 }
 
 // ------
-get('https://'+getQueryVariable('redirectUrl'), function(result){
-    renderContent(result);
-});
-
-// get('https://lc-tn27f1ke.cn-n1.lcfile.com/RTU8Rj5SDSJmF6z8Zrfli6X6ZV2WonJZ9fk41TtK.txt', function(result){
+// get('https://'+getQueryVariable('redirectUrl'), function(result){
 //     renderContent(result);
 // });
 
+get('https://lc-tn27f1ke.cn-n1.lcfile.com/RTU8Rj5SDSJmF6z8Zrfli6X6ZV2WonJZ9fk41TtK.txt', function(result){
+    renderContent(result);
+});
+
 var logLineSize;
 var activityIndicator = new ActivityIndicator();
+var activityIndex = Array();
 
 function renderContent(logText){
-    var p = document.getElementById('input_log_area');
+    var p = document.getElementById('log_area');
 
     var logLines = logText.split('\n');
     logLineSize = logLines.length;
+
+    calculateMaxNearDistance();
 
     for (var i = 0; i < logLines.length; i++) {
         resolveActivity(logLines[i], i);
     }
 
+    var canvasArea = document.getElementById('canvas_area');
     var canvas = document.getElementById('canvas');
+    canvas.width = canvasArea.clientWidth;
+    canvas.height = canvasArea.clientHeight;
+
     ACTIVITY_AREA_WIDTH = canvas.width;
+    ACTIVITY_AREA_HEIGHT = canvas.height;
     var ctx = canvas.getContext("2d");
     drawActivityLine(ctx, activityIndicator);
 
     for (var i = 0; i < logLines.length; i++) {
         // logLines[i] = '<p>' + logLines[i].substr(1, 100) + '</p>';
-        logLines[i] = '<p class="log">' + logLines[i] + '</p>';
+        if(activityIndex.contains(i)){
+            logLines[i] = '<p class="activity_log">' + logLines[i] + '</p>';
+        }else{
+            logLines[i] = '<p class="log">' + logLines[i] + '</p>';
+        }
     }
     p.innerHTML = logLines.join('');
+}
+
+// ---
+
+function calculateMaxNearDistance(){
+    MAX_NEAR_DISTANCE = logLineSize/100;
+    if(MAX_NEAR_DISTANCE < 5) {
+        MAX_NEAR_DISTANCE = 5;
+    }
 }
 
 // --
 
 var ACTIVITY_GAP_DIV_LINE = 0.4;
 var ACTIVITY_AREA_WIDTH;
+var ACTIVITY_AREA_HEIGHT;
 var drawCount = 1;
 
 function drawActivityLine(ctx, activityIndicator) {
@@ -140,7 +199,7 @@ function drawActivityLine(ctx, activityIndicator) {
 }
 
 function getVerticalScalePx(index){
-    return (index / logLineSize) * 900;
+    return (index / logLineSize) * ACTIVITY_AREA_HEIGHT;
 }
 
 function getActivityLineWidth(stackSize) {
@@ -160,8 +219,10 @@ var ACTIVITY_FINISH_PATTERN = /(?<=退出界面：).*/;
 function resolveActivity(line, i) {
     if (line.search(ACTIVITY_CREATE_SIMPLE_CHECK) > -1) {
         activityIndicator.addCreate(i, line.match(ACTIVITY_CREATE_PATTERN)[0]);
+        activityIndex.push(i);
     } else if (line.search(ACTIVITY_FINISH_SIMPLE_CHECK) > -1) {
         activityIndicator.addFinish(i, line.match(ACTIVITY_FINISH_PATTERN)[0]);
+        activityIndex.push(i);
     }
 }
 
@@ -228,13 +289,22 @@ function OneActivityIndicator(){
 
 // ----
 
-var drag = document.getElementById('input_log_area');
+var drag = document.getElementById('log_area');
 drag.addEventListener('drop', dropHandler, false);
 drag.addEventListener('dragover', dragOverHandler, false);
 
 var canvas = document.getElementById('canvas');
 canvas.addEventListener('click', scrollByIndex, false);
 
+
+// ---
+
+Array.prototype.contains = function ( needle ) {
+  for (i in this) {
+    if (this[i] == needle) return true;
+  }
+  return false;
+}
 
 // ----
 
