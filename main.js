@@ -155,6 +155,78 @@ function calculateMaxNearDistance(){
 
 // --
 
+var logArea = document.getElementById('log_area');
+var lastScrollLogTopIndex = 0;
+var lastScrollTop = 0;
+
+drawScrollArea();
+
+function drawScrollArea() {
+    logArea.addEventListener("scroll", onLogAreaScroll);
+}
+
+function onLogAreaScroll() {
+    var topFirstOutLogIndex = getTopFirstOutLogIndex();
+    var bottomFirstOutLogIndex = getBottomFirstOutLogIndex(topFirstOutLogIndex);
+
+    var topPx = getVerticalScalePx(topFirstOutLogIndex);
+    var height = getVerticalScalePx(bottomFirstOutLogIndex) - topPx;
+
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawActivityLine(ctx, activityIndicator);
+
+    ctx.fillStyle = 'rgba(0,255,225,0.3)';
+    ctx.fillRect(0, topPx, ACTIVITY_AREA_WIDTH,height);
+
+}
+
+function getTopFirstOutLogIndex() {
+    var targetIndex = 0;
+
+    var thisScrollTop = logArea.scrollTop;
+    if(lastScrollTop < thisScrollTop){
+        // 上滑内容
+        for (var i = lastScrollLogTopIndex; i < logArea.childNodes.length; i++) {
+            var childNode = logArea.childNodes[i];
+            if(childNode.offsetTop + childNode.clientHeight >= thisScrollTop){
+                targetIndex = i-1;
+                if(targetIndex<0) targetIndex = 0;
+                break;
+            }
+        }
+    } else {
+        // 下滑内容
+        for (var i = lastScrollLogTopIndex; i >= 0; i--) {
+            var childNode = logArea.childNodes[i];
+            if(childNode.offsetTop + childNode.clientHeight <= thisScrollTop){
+                targetIndex = i;
+                break;
+            }
+        }
+    }
+
+    lastScrollLogTopIndex = targetIndex;
+    lastScrollTop = thisScrollTop;
+
+    return targetIndex;
+}
+
+function getBottomFirstOutLogIndex(topFirstOutLogIndex) {
+    var thisScrollBottom = logArea.scrollTop + logArea.clientHeight;
+    for (var i = topFirstOutLogIndex; i < logArea.childNodes.length; i++) {
+        var childNode = logArea.childNodes[i];
+        if(childNode.offsetTop >= thisScrollBottom){
+            return i;
+        }
+    }
+    return logArea.childNodes.length - 1;
+}
+
+// --
+
 var ACTIVITY_GAP_DIV_LINE = 0.4;
 var ACTIVITY_AREA_WIDTH;
 var ACTIVITY_AREA_HEIGHT;
@@ -166,6 +238,7 @@ function drawActivityLine(ctx, activityIndicator) {
     var gapWidth = lineWidth * ACTIVITY_GAP_DIV_LINE;
     ctx.lineWidth = lineWidth;
 
+    drawCount = 1;
     for (var i = 0; i < activityStack.length; i++) {
         var x = (gapWidth + lineWidth * 0.5) * (i + 1) + lineWidth * 0.5 * i;
 
