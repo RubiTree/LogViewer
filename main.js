@@ -137,9 +137,9 @@ function renderContent(logText) {
     for (var i = 0; i < logLines.length; i++) {
         // logLines[i] = '<p>' + logLines[i].substr(1, 100) + '</p>';
         if (activityIndex.contains(i)) {
-            logLines[i] = '<p class="activity_log">' + logLines[i] + '</p>';
+            logLines[i] = '<p class="activity_log" data-origin="" data-json = "" data-state = "origin">' + logLines[i] + '</p>';
         } else {
-            logLines[i] = '<p class="log">' + logLines[i] + '</p>';
+            logLines[i] = '<p class="log" data-origin="" data-json = "" data-state = "origin">' + logLines[i] + '</p>';
         }
     }
     p.innerHTML = logLines.join('');
@@ -375,6 +375,8 @@ canvas.addEventListener('click', scrollByIndex, false);
 
 //-- to json btn
 
+var jsonedLines = [];
+
 var jsonBtn = document.getElementById('to_json_btn');
 jsonBtn.addEventListener('click', activeJsConverter, false);
 
@@ -391,18 +393,35 @@ drag.addEventListener('click', convertToJson, false);
 function convertToJson(e) {
     if (isJsConverterActive) {
         var target = e.target;
-        var logContent = target.innerHTML;
-        var jsonObj;
-        try {
-            jsonObj = JSON.parse(logContent);
-        } catch (err) {
-            //在这里处理错误
+        // todo get p element, to body
+
+        if(target.dataset.state == "origin"){
+            if(target.dataset.json == ""){
+                var logContent = target.innerHTML;
+                target.dataset.origin = logContent;
+
+                var jsonObj;
+                try {
+                    jsonObj = JSON.parse(logContent);
+                } catch (err) {
+                }
+
+                if (jsonObj) {
+                    var formattedStr = JSON.stringify(jsonObj, undefined, 4);
+                    target.dataset.json = highLight(formattedStr);
+
+                    target.innerHTML = target.dataset.json;
+                    target.dataset.state = "json";
+                }
+            } else {
+                target.innerHTML = target.dataset.json;
+                target.dataset.state = "json";
+            }
+        } else if (target.dataset.state == "json") {
+            target.innerHTML = target.dataset.origin;
+            target.dataset.state = "origin";
         }
 
-        if (jsonObj) {
-            var formattedStr = JSON.stringify(jsonObj, undefined, 4);
-            target.innerHTML = highLight(formattedStr);
-        }
         isJsConverterActive = false;
         setLogAreaCursorNormal();
         jsonBtn.innerHTML = 'JSON';
