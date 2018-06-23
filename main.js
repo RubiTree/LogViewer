@@ -257,15 +257,16 @@ function drawActivityLine(ctx, activityIndicator) {
 
             drawCount++;
             if (drawCount % 2 == 1) {
-                ctx.strokeStyle = "#dc63c2";
+                ctx.strokeStyle = "#604ff0";
             } else {
                 ctx.strokeStyle = "#7c71d8";
             }
+            // dc63c2 7c71d8
 
             ctx.stroke();
 
-            ctx.font = "12px Georgia";
-            ctx.fillStyle = "#000000";
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "#cccccc";
             ctx.fillText(activityIndicator.activityName, x - lineWidth / 2, startY);
 
             // activityTexts.add(new PreDrawText(activityIndicator.getActivityName(),
