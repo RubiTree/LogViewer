@@ -54,7 +54,7 @@ function scrollByPx(e) {
 
 function scrollByIndex(e) {
     var p = document.getElementById('log_area');
-    var index = Math.ceil((e.clientY / ACTIVITY_AREA_HEIGHT) * logLineSize);
+    var index = Math.ceil((e.clientY * ratio / ACTIVITY_AREA_HEIGHT) * logLineSize);
 
     // 过滤最大值
     if (index >= p.childNodes.length) {
@@ -65,7 +65,7 @@ function scrollByIndex(e) {
     index = getNearKeyIndex(index);
 
     var child = p.childNodes[index];
-    p.scrollTop = child.offsetTop - (ACTIVITY_AREA_HEIGHT / 2);
+    p.scrollTop = child.offsetTop - (ACTIVITY_AREA_HEIGHT / (2*ratio));
 }
 
 var MAX_NEAR_DISTANCE;
