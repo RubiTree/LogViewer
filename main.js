@@ -4,6 +4,7 @@ function dragOverHandler(e) {
     e.dataTransfer.dragEffect = 'copy';
 }
 
+// 废弃
 function dropHandler(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -111,6 +112,7 @@ get('https://'+getQueryVariable('redirectUrl'), function(result){
 var logLineSize;
 var activityIndicator = new ActivityIndicator();
 var activityIndex = Array();
+var ratio;
 
 function renderContent(logText) {
     var p = document.getElementById('log_area');
@@ -126,12 +128,17 @@ function renderContent(logText) {
 
     var canvasArea = document.getElementById('canvas_area');
     var canvas = document.getElementById('canvas');
-    canvas.width = canvasArea.clientWidth;
-    canvas.height = canvasArea.clientHeight;
+    var ctx = canvas.getContext("2d");
+
+    ratio = getRatio(ctx) || 1; // 屏幕分辨率
+    canvas.width = canvasArea.clientWidth * ratio;
+    canvas.height = canvasArea.clientHeight * ratio;
+    canvas.style.width = canvasArea.clientWidth + "px";
+    canvas.style.height = canvasArea.clientHeight + "px";
 
     ACTIVITY_AREA_WIDTH = canvas.width;
     ACTIVITY_AREA_HEIGHT = canvas.height;
-    var ctx = canvas.getContext("2d");
+
     drawActivityLine(ctx, activityIndicator);
 
     for (var i = 0; i < logLines.length; i++) {
@@ -175,7 +182,7 @@ function onLogAreaScroll() {
 
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width*ratio, canvas.height*ratio);
 
     drawActivityLine(ctx, activityIndicator);
 
@@ -265,7 +272,7 @@ function drawActivityLine(ctx, activityIndicator) {
 
             ctx.stroke();
 
-            ctx.font = "14px Arial";
+            ctx.font = 12*ratio+"px Arial";
             ctx.fillStyle = "#cccccc";
             ctx.fillText(activityIndicator.activityName, x - lineWidth / 2, startY);
 
@@ -469,6 +476,17 @@ Array.prototype.contains = function(needle) {
 }
 
 // ----
+
+function getRatio(context) {
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    var backingStorePixelRatio = context.webkitBackingStorePixelRatio ||
+                                 context.mozBackingStorePixelRatio ||
+                                 context.msBackingStorePixelRatio ||
+                                 context.oBackingStorePixelRatio ||
+                                 context.backingStorePixelRatio || 1;
+    var ratio = devicePixelRatio / backingStorePixelRatio;
+    return ratio;
+}
 
 // 禁用页面回退
 history.pushState(null, null, document.URL);
