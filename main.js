@@ -46,6 +46,8 @@ function dropHandler(e) {
     reader.readAsText(file);
 }
 
+//- ----
+
 function scrollByPx(e) {
     var p = document.getElementById('log_area');
     var contentHeight = p.scrollHeight;
@@ -114,6 +116,10 @@ var activityIndicator = new ActivityIndicator();
 var activityIndex = Array();
 var ratio;
 
+var canvasArea = document.getElementById('canvas_area');
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext("2d");
+
 function renderContent(logText) {
     var p = document.getElementById('log_area');
 
@@ -126,18 +132,7 @@ function renderContent(logText) {
         resolveActivity(logLines[i], i);
     }
 
-    var canvasArea = document.getElementById('canvas_area');
-    var canvas = document.getElementById('canvas');
-    var ctx = canvas.getContext("2d");
-
-    ratio = getRatio(ctx) || 1; // 屏幕分辨率
-    canvas.width = canvasArea.clientWidth * ratio;
-    canvas.height = canvasArea.clientHeight * ratio;
-    canvas.style.width = canvasArea.clientWidth + "px";
-    canvas.style.height = canvasArea.clientHeight + "px";
-
-    ACTIVITY_AREA_WIDTH = canvas.width;
-    ACTIVITY_AREA_HEIGHT = canvas.height;
+    initCanvasSize();
 
     drawActivityLine(ctx, activityIndicator);
 
@@ -150,6 +145,17 @@ function renderContent(logText) {
         }
     }
     p.innerHTML = logLines.join('');
+}
+
+function initCanvasSize(){
+    ratio = getRatio(ctx) || 1; // 屏幕分辨率
+    canvas.width = canvasArea.clientWidth * ratio;
+    canvas.height = canvasArea.clientHeight * ratio;
+    canvas.style.width = canvasArea.clientWidth + "px";
+    canvas.style.height = canvasArea.clientHeight + "px";
+
+    ACTIVITY_AREA_WIDTH = canvas.width;
+    ACTIVITY_AREA_HEIGHT = canvas.height;
 }
 
 // ---
@@ -378,7 +384,6 @@ var drag = document.getElementById('log_area');
 drag.addEventListener('drop', dropHandler, false);
 drag.addEventListener('dragover', dragOverHandler, false);
 
-var canvas = document.getElementById('canvas');
 canvas.addEventListener('click', scrollByIndex, false);
 
 //-- to json btn
@@ -465,6 +470,13 @@ function highLight(json) {
         return '<span class="' + cls + '">' + match + '</span>';
     });
 }
+
+// ------
+
+window.onresize = function(){
+    initCanvasSize();
+    onLogAreaScroll();
+};
 
 // ---
 
