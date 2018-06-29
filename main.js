@@ -14,7 +14,7 @@ function dropHandler(e) {
     var file = files[0];
     var reader = new FileReader();
 
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         var logText = this.result;
         var logLines = logText.split('\n');
         var logLineSize = logLines.length;
@@ -67,7 +67,7 @@ function scrollByIndex(e) {
     index = getNearKeyIndex(index);
 
     var child = p.childNodes[index];
-    p.scrollTop = child.offsetTop - (ACTIVITY_AREA_HEIGHT / (2*ratio));
+    p.scrollTop = child.offsetTop - (ACTIVITY_AREA_HEIGHT / (2 * ratio));
 }
 
 var MAX_NEAR_DISTANCE;
@@ -101,7 +101,7 @@ function getNearKeyIndex(index) {
 
 //------
 
-get('https://'+getQueryVariable('redirectUrl'), function(result){
+get('https://' + getQueryVariable('redirectUrl'), function (result) {
     renderContent(result);
 });
 
@@ -131,6 +131,7 @@ function renderContent(logText) {
     for (var i = 0; i < logLines.length; i++) {
         resolveActivity(logLines[i], i);
     }
+    activityIndicator.analysis(0, logLines.length-1);
 
     initCanvasSize();
 
@@ -147,7 +148,7 @@ function renderContent(logText) {
     p.innerHTML = logLines.join('');
 }
 
-function initCanvasSize(){
+function initCanvasSize() {
     ratio = getRatio(ctx) || 1; // 屏幕分辨率
     canvas.width = canvasArea.clientWidth * ratio;
     canvas.height = canvasArea.clientHeight * ratio;
@@ -188,7 +189,7 @@ function onLogAreaScroll() {
 
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width*ratio, canvas.height*ratio);
+    ctx.clearRect(0, 0, canvas.width * ratio, canvas.height * ratio);
 
     drawActivityLine(ctx, activityIndicator);
 
@@ -278,7 +279,7 @@ function drawActivityLine(ctx, activityIndicator) {
 
             ctx.stroke();
 
-            ctx.font = 12*ratio+"px Arial";
+            ctx.font = 12 * ratio + "px Arial";
             ctx.fillStyle = "#cccccc";
             ctx.fillText(activityIndicator.activityName, x - lineWidth / 2, startY);
 
@@ -302,80 +303,24 @@ function getActivityLineWidth(stackSize) {
 }
 
 // --
-var ACTIVITY_CREATE_SIMPLE_CHECK = /进入界面/;
-var ACTIVITY_CREATE_PATTERN = /(?<=进入界面：).*/;
-var ACTIVITY_FINISH_SIMPLE_CHECK = /退出界面/;
-var ACTIVITY_FINISH_PATTERN = /(?<=退出界面：).*/;
+// var ACTIVITY_CREATE_SIMPLE_CHECK = /进入界面/;
+// var ACTIVITY_CREATE_PATTERN = /(?<=进入界面：).*/;
+// var ACTIVITY_FINISH_SIMPLE_CHECK = /退出界面/;
+// var ACTIVITY_FINISH_PATTERN = /(?<=退出界面：).*/;
+
+var ACTIVITY_CREATE_SIMPLE_CHECK = /onActivityCreated/;
+var ACTIVITY_CREATE_PATTERN = /(?<=onActivityCreated\] : ).*/;
+var ACTIVITY_FINISH_SIMPLE_CHECK = /onActivityDestroyed/;
+var ACTIVITY_FINISH_PATTERN = /(?<=onActivityDestroyed\] : ).*/;
 
 function resolveActivity(line, i) {
     if (line.search(ACTIVITY_CREATE_SIMPLE_CHECK) > -1) {
-        activityIndicator.addCreate(i, line.match(ACTIVITY_CREATE_PATTERN)[0]);
+        activityIndicator.pushStart(i, line.match(ACTIVITY_CREATE_PATTERN)[0]);
         activityIndex.push(i);
     } else if (line.search(ACTIVITY_FINISH_SIMPLE_CHECK) > -1) {
-        activityIndicator.addFinish(i, line.match(ACTIVITY_FINISH_PATTERN)[0]);
+        activityIndicator.pushEnd(i, line.match(ACTIVITY_FINISH_PATTERN)[0]);
         activityIndex.push(i);
     }
-}
-
-// ---
-function ActivityIndicator() {
-    this.activityIndicatorStack = [];
-    this.stackIndex = -1;
-
-    this.addCreate = function(index, activityName) {
-        this.stackIndex++;
-
-        this.chargeIndicatorStack(this.stackIndex + 1);
-        var currentStack = this.activityIndicatorStack[this.stackIndex];
-
-        var indicator = new OneActivityIndicator();
-        indicator.activityName = activityName;
-        indicator.startIndex = index;
-
-        currentStack.push(indicator);
-
-    }
-
-    this.addFinish = function(lineIndex, activityName) {
-        if (this.stackIndex < -1) {
-            return;
-        }
-
-        if (this.stackIndex == -1) {
-            var indicator = new OneActivityIndicator();
-            indicator.activityName = activityName;
-            indicator.endIndex = lineIndex;
-
-            var newStack = new Array();
-            newStack.push(indicator);
-
-            this.activityIndicatorStack.unshift(newStack);
-        } else {
-            var currentStack = this.activityIndicatorStack[this.stackIndex];
-            var index = currentStack.length - 1;
-            var currentActivity = currentStack[index];
-
-            if (currentActivity.activityName == activityName) {
-                currentActivity.endIndex = lineIndex;
-                this.stackIndex--;
-            }
-        }
-    }
-
-    this.chargeIndicatorStack = function(targetSize) {
-        var less = targetSize - this.activityIndicatorStack.length;
-        if (less > 0) {
-            for (var i = 0; i < less; i++) {
-                this.activityIndicatorStack.push(new Array());
-            }
-        }
-    }
-}
-
-function OneActivityIndicator() {
-    this.activityName = "";
-    this.startIndex = 0;
-    this.endIndex = 0;
 }
 
 // ----
@@ -408,8 +353,8 @@ function convertToJson(e) {
         var target = e.target;
         // todo get p element, to body
 
-        if(target.dataset.state == "origin"){
-            if(target.dataset.json == ""){
+        if (target.dataset.state == "origin") {
+            if (target.dataset.json == "") {
                 var logContent = target.innerHTML;
                 target.dataset.origin = logContent;
 
@@ -444,6 +389,7 @@ function convertToJson(e) {
 function setLogAreaCursorFind() {
     setCursor(drag, 'url(img/json_cursor.png),auto');
 }
+
 function setLogAreaCursorNormal() {
     setCursor(drag, 'default');
 }
@@ -454,7 +400,7 @@ function setCursor(ele, cursorStyle) {
 
 function highLight(json) {
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
         var cls = 'number';
         if (/^"/.test(match)) {
             if (/:$/.test(match)) {
@@ -473,16 +419,16 @@ function highLight(json) {
 
 // ------
 
-window.onresize = function(){
+window.onresize = function () {
     initCanvasSize();
     onLogAreaScroll();
 };
 
 // ---
 
-Array.prototype.contains = function(needle) {
+Array.prototype.contains = function (needle) {
     for (i in this) {
-        if (this[i] == needle) return true;
+        if (this[i] === needle) return true;
     }
     return false;
 }
@@ -492,17 +438,17 @@ Array.prototype.contains = function(needle) {
 function getRatio(context) {
     var devicePixelRatio = window.devicePixelRatio || 1;
     var backingStorePixelRatio = context.webkitBackingStorePixelRatio ||
-                                 context.mozBackingStorePixelRatio ||
-                                 context.msBackingStorePixelRatio ||
-                                 context.oBackingStorePixelRatio ||
-                                 context.backingStorePixelRatio || 1;
+        context.mozBackingStorePixelRatio ||
+        context.msBackingStorePixelRatio ||
+        context.oBackingStorePixelRatio ||
+        context.backingStorePixelRatio || 1;
     var ratio = devicePixelRatio / backingStorePixelRatio;
     return ratio;
 }
 
 // 禁用页面回退
 history.pushState(null, null, document.URL);
-window.addEventListener('popstate', function() {
+window.addEventListener('popstate', function () {
     history.pushState(null, null, document.URL);
 });
 
@@ -512,7 +458,7 @@ function getQueryVariable(variable) {
     var vars = query.split("&");
     for (var i = 0; i < vars.length; i++) {
         var pair = vars[i].split("=");
-        if (pair[0] == variable) {
+        if (pair[0] === variable) {
             return pair[1];
         }
     }
@@ -523,7 +469,7 @@ function getQueryVariable(variable) {
 function get(url, callback) {
     var xhr = new XMLHttpRequest(); //创建新请求
     xhr.open('GET', url);
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         //如果请求完成且成功
         if (xhr.readyState === 4 && xhr.status === 200) {
             //获得响应的类型
