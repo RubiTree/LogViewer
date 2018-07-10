@@ -314,12 +314,19 @@ var ACTIVITY_FINISH_SIMPLE_CHECK = /onActivityDestroyed/;
 var ACTIVITY_FINISH_PATTERN = /(?<=onActivityDestroyed\] : ).*/;
 
 function resolveActivity(line, i) {
+    var matchResult = [];
     if (line.search(ACTIVITY_CREATE_SIMPLE_CHECK) > -1) {
-        activityIndicator.pushStart(i, line.match(ACTIVITY_CREATE_PATTERN)[0]);
-        activityIndex.push(i);
+        matchResult = line.match(ACTIVITY_CREATE_PATTERN);
+        if(matchResult!==null){
+            activityIndicator.pushStart(i, matchResult[0]);
+            activityIndex.push(i);
+        }
     } else if (line.search(ACTIVITY_FINISH_SIMPLE_CHECK) > -1) {
-        activityIndicator.pushEnd(i, line.match(ACTIVITY_FINISH_PATTERN)[0]);
-        activityIndex.push(i);
+        matchResult = line.match(ACTIVITY_FINISH_PATTERN);
+        if(matchResult!==null){
+            activityIndicator.pushEnd(i, matchResult[0]);
+            activityIndex.push(i);
+        }
     }
 }
 
