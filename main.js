@@ -16,30 +16,32 @@ function dropHandler(e) {
 
     reader.onload = function (e) {
         var logText = this.result;
-        var logLines = logText.split('\n');
-        var logLineSize = logLines.length;
+        // var logLines = logText.split('\n');
+        // var logLineSize = logLines.length;
+        //
+        // var foundIndex = [];
+        // var regex = /进入界面/;
+        // for (var i = 0; i < logLines.length; i++) {
+        //     if (logLines[i].search(regex) > -1) {
+        //         foundIndex.push(i);
+        //     }
+        // }
+        //
+        // var canvas = document.getElementById('canvas');
+        // var ctx = canvas.getContext("2d");
+        // for (var i = 0; i < foundIndex.length; i++) {
+        //     var positionY = (foundIndex[i] / logLineSize) * 900;
+        //     ctx.moveTo(0, positionY);
+        //     ctx.lineTo(200, positionY);
+        // }
+        // ctx.stroke();
+        //
+        // for (var i = 0; i < logLines.length; i++) {
+        //     logLines[i] = '<p>' + logLines[i].substr(1, 100) + '</p>';
+        // }
+        // p.innerHTML = logLines.join('');
 
-        var foundIndex = [];
-        var regex = /进入界面/;
-        for (var i = 0; i < logLines.length; i++) {
-            if (logLines[i].search(regex) > -1) {
-                foundIndex.push(i);
-            }
-        }
-
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext("2d");
-        for (var i = 0; i < foundIndex.length; i++) {
-            var positionY = (foundIndex[i] / logLineSize) * 900;
-            ctx.moveTo(0, positionY);
-            ctx.lineTo(200, positionY);
-        }
-        ctx.stroke();
-
-        for (var i = 0; i < logLines.length; i++) {
-            logLines[i] = '<p>' + logLines[i].substr(1, 100) + '</p>';
-        }
-        p.innerHTML = logLines.join('');
+        renderContent(logText);
     }
 
     //读取文件内容
@@ -406,6 +408,7 @@ function setCursor(ele, cursorStyle) {
 }
 
 function highLight(json) {
+    json = json.replace(/: /g, ':');
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
         var cls = 'number';
